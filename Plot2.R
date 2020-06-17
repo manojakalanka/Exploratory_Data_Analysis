@@ -1,3 +1,4 @@
+
 library("data.table")
 
 setwd("D:\\Exploratory Data Analysis")
@@ -7,19 +8,20 @@ powerDT <- data.table::fread(input = "household_power_consumption.txt"
                              , na.strings="?"
 )
 
-# Prevents histogram from printing in scientific notation
+# Prevents Scientific Notation
 powerDT[, Global_active_power := lapply(.SD, as.numeric), .SDcols = c("Global_active_power")]
 
-# Change Date Column to Date Type
-powerDT[, Date := lapply(.SD, as.Date, "%d/%m/%Y"), .SDcols = c("Date")]
+# Making a POSIXct date capable of being filtered and graphed by time of day
+powerDT[, dateTime := as.POSIXct(paste(Date, Time), format = "%d/%m/%Y %H:%M:%S")]
 
 # Filter Dates for 2007-02-01 and 2007-02-02
-powerDT <- powerDT[(Date >= "2007-02-01") & (Date <= "2007-02-02")]
+powerDT <- powerDT[(dateTime >= "2007-02-01") & (dateTime < "2007-02-03")]
 
-png("plot1.png", width=480, height=480)
+png("plot2.png", width=480, height=480)
 
-## Plot 1
-hist(powerDT[, Global_active_power], main="Global Active Power", 
-     xlab="Global Active Power (kilowatts)", ylab="Frequency", col="Red")
+## Plot 2
+plot(x = powerDT[, dateTime]
+     , y = powerDT[, Global_active_power]
+     , type="l", xlab="", ylab="Global Active Power (kilowatts)")
 
 dev.off()
